@@ -15,9 +15,22 @@
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
-        video {
-            max-width: calc(50% - 100px);
+        #remoteVideo {
+            max-width: calc(100% - 100px);
+            /*width: 80%;*/
+            height: 80%;
             margin: 0 50px;
+            box-sizing: border-box;
+            border-radius: 2px;
+            padding: 0;
+            box-shadow: rgba(156, 172, 172, 0.2) 0px 2px 2px, rgba(156, 172, 172, 0.2) 0px 4px 4px, rgba(156, 172, 172, 0.2) 0px 8px 8px, rgba(156, 172, 172, 0.2) 0px 16px 16px, rgba(156, 172, 172, 0.2) 0px 32px 32px, rgba(156, 172, 172, 0.2) 0px 64px 64px;
+        }
+
+        #localVideo {
+            position: fixed;
+            max-width: 320px;
+            top: 50px;
+            right: 50px;
             box-sizing: border-box;
             border-radius: 2px;
             padding: 0;
@@ -26,7 +39,7 @@
 
         .copy {
             position: fixed;
-            top: 10px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
             font-size: 16px;
@@ -35,12 +48,21 @@
     </style>
 </head>
 <body>
-<div class="copy">Send your URL to a friend to start a video call</div>
-<video id="localVideo" autoplay muted></video>
-<video id="remoteVideo" autoplay></video>
+<button class="copy" onclick="startVideo();">Start Consultation</button>
+<video id="localVideo"></video>
+<video id="remoteVideo"></video>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="/javascripts/script.js"></script>
+<script>
+    var localVideo = document.getElementById('localVideo');
+    var remoteVideo = document.getElementById('remoteVideo');
+
+    function startVideo() {
+        localVideo.play();
+        remoteVideo.play();
+    }
+</script>
 </body>
 </html>
 
