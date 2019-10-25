@@ -10,9 +10,21 @@ const roomHash = location.hash.substring(1);
 // Room name needs to be prefixed with 'observable-'
 const roomName = 'observable-' + roomHash;
 const configuration = {
-    iceServers: [{
-        urls: 'stun:stun.l.google.com:19302'
-    }]
+    'iceServers': [
+        {
+            'urls': 'stun:stun.l.google.com:19302'
+        },
+        {
+            'urls': 'turn:192.158.29.39:3478?transport=udp',
+            'credential': 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+            'username': '28224511:1379330808'
+        },
+        {
+            'urls': 'turn:192.158.29.39:3478?transport=tcp',
+            'credential': 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+            'username': '28224511:1379330808'
+        }
+    ]
 };
 let room;
 let pc;
@@ -31,7 +43,13 @@ socket.on('connect', function () {
             console.log('3 people not allowed')
             return
         }
+
         const isOfferer = members.length === 2;
+        if (!isOfferer) {
+            messageDiv.innerHTML = "Wait for other person to connect";
+        } else {
+            messageDiv.innerHTML = "<button onclick=\"startVideo();\">Start Video Session</button>";
+        }
         startWebRTC(isOfferer);
     });
 });
@@ -46,32 +64,8 @@ function onError(error) {
     console.error(error);
 };
 
-// drone.on('open', error => {
-//     if (error) {
-//         return console.error(error);
-//     }
-//     room = drone.subscribe(roomName);
-//     room.on('open', error => {
-//         if (error) {
-//             onError(error);
-//         }
-//     });
-//     // We're connected to the room and received an array of 'members'
-//     // connected to the room (including us). Signaling server is ready.
-//     room.on('members', members => {
-//         console.log('MEMBERS', members);
-//         // If we are the second user to connect to the room we will be creating the offer
-//         const isOfferer = members.length === 2;
-//         startWebRTC(isOfferer);
-//     });
-// });
-
-// Send signaling data via Scaledrone
+// Send signaling data via socketio
 function sendMessage(message) {
-    // drone.publish({
-    //     room: roomName,
-    //     message
-    // });
     socket.emit('room:event', {room_id: roomName, message});
 }
 
@@ -82,6 +76,7 @@ function startWebRTC(isOfferer) {
     // message to the other peer through the signaling server
     pc.onicecandidate = event => {
         if (event.candidate) {
+            console.log(event);
             sendMessage({'candidate': event.candidate});
         }
     };
@@ -96,6 +91,7 @@ function startWebRTC(isOfferer) {
     // When a remote stream arrives display it in the #remoteVideo element
     pc.ontrack = event => {
         const stream = event.streams[0];
+        console.log(stream);
         if (!remoteVideo.srcObject || remoteVideo.srcObject.id !== stream.id) {
             remoteVideo.srcObject = stream;
         }
@@ -120,14 +116,12 @@ function startWebRTC(isOfferer) {
         stream.getTracks().forEach(track => pc.addTrack(track, stream));
     }, onError);
 
-    // Listen to signaling data from Scaledrone
+    // Listen to signaling data from socket
     socket.on('room:event', (message) => {
         // Message was sent by us
         if (socket.id === message.senderId) {
             return;
         }
-
-        console.log(message);
 
         if (message.sdp) {
             // This is called after receiving an offer or answer from another peer

@@ -48,19 +48,27 @@
     </style>
 </head>
 <body>
-<button class="copy" onclick="startVideo();">Start Consultation</button>
-<video id="localVideo"></video>
+<div class="copy" id="message">
+
+</div>
+<video id="localVideo" muted></video>
 <video id="remoteVideo"></video>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="/javascripts/script.js"></script>
 <script>
-    var localVideo = document.getElementById('localVideo');
-    var remoteVideo = document.getElementById('remoteVideo');
+    var local = document.getElementById('localVideo');
+    var remote = document.getElementById('remoteVideo');
+    var messageDiv = document.getElementById('message');
 
     function startVideo() {
-        localVideo.play();
-        remoteVideo.play();
+        local.play();
+        remote.play();
+    }
+
+    function stopVideo() {
+        local.stop();
+        remote.stop();
     }
 </script>
 </body>
